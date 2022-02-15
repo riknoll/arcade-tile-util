@@ -53,8 +53,8 @@ namespace tileUtil {
                 if (tile.column >= leftColumn && tile.column <= rightColumn && tile.row >= topRow && tile.row <= bottomRow) {
                     canvas.drawTransparentImage(
                         tile.image,
-                        tile.column << tilemap.scale,
-                        tile.row << tilemap.scale
+                        (tile.column << tilemap.scale) - camera.drawOffsetX,
+                        (tile.row << tilemap.scale) - camera.drawOffsetY
                     );
                 }
             }

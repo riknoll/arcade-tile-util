@@ -1,12 +1,35 @@
+namespace ConnectionKind {
+    let nextKind: number
+    export function create() {
+        if (nextKind === undefined) nextKind = 1;
+        return nextKind++;
+    }
+
+    //% isKind
+    export const Door1 = create();
+
+    //% isKind
+    export const Door2 = create();
+
+    //% isKind
+    export const Door3 = create();
+
+    //% isKind
+    export const Door4 = create();
+}
+
+//% color=#d8bfd8 icon="\uf279"
+//% block="Tile Util"
+//% groups='["Tilemaps", "Tiles", "Events", "Connections", "Camera"]'
 namespace tileUtil {
-    enum TilemapProperty {
-        //% block="width in columns"
+    export enum TilemapProperty {
+        //% block="number of columns"
         Columns,
-        //% block="height in rows"
+        //% block="number of rows"
         Rows,
-        //% block="width in pixels"
+        //% block="width"
         PixelWidth,
-        //% block="height in pixels"
+        //% block="height"
         PixelHeight,
         //% block="tile width"
         TileWidth
@@ -17,6 +40,9 @@ namespace tileUtil {
      */
     //% blockId=tileUtil_tilemapProperty
     //% block="$data $prop"
+    //% data.shadow=variables_get
+    //% data.defl=tilemap
+    //% group=Tilemaps
     export function tilemapProperty(data: tiles.TileMapData, prop: TilemapProperty): number {
         switch (prop) {
             case TilemapProperty.Columns:
@@ -37,6 +63,7 @@ namespace tileUtil {
      */
     //% shim=KIND_GET
     //% blockId=tileUtil_connectionKind block="$kind"
+    //% group="Connections" weight=0
     //% kindNamespace=ConnectionKind kindMemberName=kind kindPromptHint="e.g. Door1, Tunnel1, ..."
      export function _connectionKind(kind: number): number {
         return kind;
@@ -46,13 +73,13 @@ namespace tileUtil {
      * Connects two tilemaps with a connection name or number.
      * Connections work in both ways and are remembered by both tilemaps.
      */
-    //% block="connect $tilemap1 and $tilemap2 by $connection"
+    //% block="connect $mapA and $mapB by $connectionId"
     //% blockId=tileUtil_connectMapById
-    //% tilemap1.shadow=variables_get
-    //% tilemap1.defl=tilemap1
-    //% tilemap2.shadow=variables_get
-    //% tilemap2.defl=tilemap2
-    //% connection.shadow=tileUtil_connectionKind
+    //% mapA.shadow=variables_get
+    //% mapA.defl=tilemap1
+    //% mapB.shadow=variables_get
+    //% mapB.defl=tilemap2
+    //% connectionId.shadow=tileUtil_connectionKind
     //% group="Connections" weight=40 blockGap=8
     export function connectMaps(mapA: tiles.TileMapData, mapB: tiles.TileMapData, connectionId: number): void {
         _state().connectMaps(mapA, mapB, connectionId);
@@ -61,11 +88,11 @@ namespace tileUtil {
     /**
      * Gets the destination tilemap connected to the source tilemap by the given connection name or number.
      */
-    //% block="get tilemap connected to $tilemap by $connection"
+    //% block="get tilemap connected to $map by $connectionId"
     //% blockId=tileUtil_getConnectedMap
-    //% tilemap.shadow=variables_get
-    //% tilemap.defl=tilemap
-    //% connection.shadow=tileUtil_connectionKind
+    //% map.shadow=variables_get
+    //% map.defl=tilemap
+    //% connectionId.shadow=tileUtil_connectionKind
     //% group="Connections" weight=10 blockGap=8
     export function getConnectedMap(map: tiles.TileMapData, connectionId: number): tiles.TileMapData {
         return _state().getConnectedMap(map, connectionId);
@@ -75,12 +102,12 @@ namespace tileUtil {
      * Loads the overworld tilemap connected to the current tilemap by the
      * given connection name or number.
      */
-    //% block="load tilemap connected by $connection"
+    //% block="load tilemap connected by $connectionId"
     //% blockId=tileUtil_loadConnectedMap
-    //% connection.shadow=tileUtil_connectionKind
+    //% connectionId.shadow=tileUtil_connectionKind
     //% group="Connections" weight=30 blockGap=8
-    export function loadConnectedMap(connection: number) {
-        const nextMap = getConnectedMap(currentTilemap(), connection)
+    export function loadConnectedMap(connectionId: number) {
+        const nextMap = getConnectedMap(currentTilemap(), connectionId)
         if (nextMap) {
             scene.setTileMapLevel(nextMap);
         }
@@ -98,7 +125,7 @@ namespace tileUtil {
     //% tilemap.fieldOptions.tileWidth=8
     //% tilemap.fieldOptions.initWidth=20
     //% tilemap.fieldOptions.initHeight=15
-    //% group="Creation" weight=49 blockGap=8
+    //% group="Tilemaps" weight=49 blockGap=8
     //% duplicateShadowOnDrag
     export function createSmallMap(tilemap: tiles.TileMapData): tiles.TileMapData {
         return tilemap
@@ -112,7 +139,7 @@ namespace tileUtil {
     //% blockId=tileUtil_cloneMap
     //% map.shadow=variables_get
     //% map.defl=tilemap
-    //% group="Creation" weight=25 blockGap=8
+    //% group="Tilemaps" weight=25 blockGap=8
     export function cloneMap(map: tiles.TileMapData): tiles.TileMapData {
         const buffer = control.createBuffer(4 + map.width * map.height);
         buffer.setNumber(NumberFormat.UInt16LE, 0, map.width);
@@ -141,7 +168,7 @@ namespace tileUtil {
     //% block="on tilemap loaded $tilemap"
     //% blockId=tileUtil_onMapLoaded
     //% draggableParameters="reporter"
-    //% group="Creation" weight=20 blockGap=8
+    //% group="Events" weight=20 blockGap=8
     export function onMapLoaded(cb: (tilemap: tiles.TileMapData) => void) {
         tiles.addEventListener(tiles.TileMapEvent.Loaded, cb);
     }
@@ -152,9 +179,20 @@ namespace tileUtil {
     //% block="on tilemap unloaded $tilemap"
     //% blockId=tileUtil_onMapUnloaded
     //% draggableParameters="reporter"
-    //% group="Creation" weight=10 blockGap=8
+    //% group="Events" weight=10 blockGap=8
     export function onMapUnloaded(cb: (tilemap: tiles.TileMapData) => void) {
         tiles.addEventListener(tiles.TileMapEvent.Unloaded, cb);
+    }
+
+    /**
+     * Unloads the current tilemap so that there is no tilemap
+     * currently active
+     */
+    //% block="unload current tilemap"
+    //% blockId=tileUtil_unloadTilemap
+    //% group="Events" weight=0 blockGap=8
+    export function unloadTilemap() {
+        scene.setTileMapLevel(undefined);
     }
 
     /**
@@ -167,7 +205,7 @@ namespace tileUtil {
     //% tileKind.decompileIndirectFixedInstances=true
     //% cover.shadow=tileset_tile_picker
     //% cover.decompileIndirectFixedInstances=true
-    //% group="Cover" weight=40 blockGap=8
+    //% group="Tiles" weight=40 blockGap=8
     export function coverAllTiles(tileKind: Image, cover: Image) {
         if (!game.currentScene().tileMap || !game.currentScene().tileMap.enabled) return;
 
@@ -177,10 +215,20 @@ namespace tileUtil {
         }
     }
 
-    export function coverTile(location: tiles.Location, coverImage: Image) {
+    /**
+     * Cover a tile at a location with a different tile image.
+     * The cover image will be removed when the tilemap changes.
+     */
+    //% block="cover $location with $cover"
+    //% blockId=tileUtil_coverTile
+    //% location.shadow=mapgettile
+    //% cover.shadow=tileset_tile_picker
+    //% cover.decompileIndirectFixedInstances=true
+    //% group="Tiles" weight=35 blockGap=8
+    export function coverTile(location: tiles.Location, cover: Image) {
         if (!game.currentScene().tileMap || !game.currentScene().tileMap.enabled) return;
         
-        _state().coverTile(location.column, location.row, coverImage);
+        _state().coverTile(location.column, location.row, cover);
     }
 
     /**
@@ -205,7 +253,7 @@ namespace tileUtil {
      */
     //% block="current tilemap"
     //% blockId=tileUtil_getLoadedMap
-    //% group="Creation" weight=30
+    //% group="Tilemaps" weight=30
     export function currentTilemap(): tiles.TileMapData {
         if (!game.currentScene().tileMap) return undefined;
         
@@ -227,13 +275,13 @@ namespace tileUtil {
      * On each tile of a given kind, create a sprite of a given SpriteKind.
      * Useful to use with the "on created [...]" sprite block.
      */
-    //% block="on each $tileKind tile create sprite with image $image of kind $kind"
+    //% block="on each $tileKind tile create sprite with image $spriteImage and kind $spriteKind"
     //% blockId=tileUtil_createSpritesOnTiles
     //% tileKind.shadow=tileset_tile_picker
     //% tileKind.decompileIndirectFixedInstances=true
     //% spriteImage.shadow=screen_image_picker
     //% spriteKind.shadow=spritekind
-    //% group="Sprites" weight=30 blockGap=8
+    //% group="Tiles" weight=30 blockGap=8
     export function createSpritesOnTiles(tileKind: Image, spriteImage: Image, spriteKind: number) {
         const scene = game.currentScene();
 

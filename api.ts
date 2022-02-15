@@ -18,7 +18,7 @@ namespace ConnectionKind {
     export const Door4 = create();
 }
 
-//% color=#d8bfd8 icon="\uf279"
+//% color=#879bff icon="\uf279"
 //% block="Tile Util"
 //% groups='["Tilemaps", "Tiles", "Events", "Connections", "Camera"]'
 namespace tileUtil {

@@ -46,13 +46,13 @@ namespace tileUtil {
     export function tilemapProperty(data: tiles.TileMapData, prop: TilemapProperty): number {
         switch (prop) {
             case TilemapProperty.Columns:
-                return data.width >> data.scale;
-            case TilemapProperty.Rows:
-                return data.height >> data.scale;
-            case TilemapProperty.PixelWidth:
                 return data.width;
-            case TilemapProperty.PixelHeight:
+            case TilemapProperty.Rows:
                 return data.height;
+            case TilemapProperty.PixelWidth:
+                return data.width << data.scale;
+            case TilemapProperty.PixelHeight:
+                return data.height << data.scale;
             case TilemapProperty.TileWidth:
                 return 1 << data.scale;
         }

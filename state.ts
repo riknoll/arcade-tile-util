@@ -46,7 +46,7 @@ namespace tileUtil {
 
         draw(canvas: Image, camera: scene.Camera) {
             const tilemap = game.currentScene().tileMap;
-            if (!tilemap) return;
+            if (!tilemap || !tilemap.enabled) return;
 
             let leftColumn = camera.left >> tilemap.scale;
             let rightColumn = camera.right >> tilemap.scale;

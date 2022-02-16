@@ -192,7 +192,9 @@ namespace tileUtil {
     //% blockId=tileUtil_unloadTilemap
     //% group="Events" weight=0 blockGap=8
     export function unloadTilemap() {
-        scene.setTileMapLevel(undefined);
+        if (game.currentScene().tileMap) {
+            game.currentScene().tileMap.setData(undefined);
+        }
     }
 
     /**

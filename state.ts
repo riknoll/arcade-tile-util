@@ -23,6 +23,10 @@ namespace tileUtil {
             this.coveredTiles = [];
             this.mapStates = [];
 
+            onMapUnloaded(() => {
+                this.coveredTiles = [];
+            })
+
             scene.createRenderable(-.9, (target, camera) => this.draw(target, camera));
         }
 
